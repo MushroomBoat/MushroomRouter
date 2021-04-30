@@ -15,7 +15,7 @@ class Boat:
     current_location = object
     destination_location = object
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         self.foil = Foil()
 
     def read(self, json_polar_file):
