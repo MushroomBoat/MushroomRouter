@@ -9,7 +9,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from boat import *
 from utils import *
 
-myboat = Boat()
+myboat = Boat(Foil=True)
 myboat.read('boats\mono\class_40.json')
 
 print("foilfactor : ", myboat.foil.foiling_factor(14, 100))

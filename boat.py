@@ -1,7 +1,7 @@
 import json
 from foil import Foil
 import numpy as np
-from utils import*
+from utils import *
 
 
 class Boat:
@@ -11,12 +11,65 @@ class Boat:
     tws_array = []
     sail_name = []
     sail_speed = []
-    options = []
     current_location = object
     destination_location = object
 
     def __init__(self, **kwargs):
-        self.foil = Foil()
+        # Choix des options
+        self.Jib_option = True
+        self.Spi_option = True
+        self.Staysail_option = False
+        self.LightJib_option = False
+        self.Code0_option = False
+        self.HeavyGnk_option = False
+        self.LightGnk_option = False
+        self.Foil_option = False
+        self.Polish_option = False
+        self.WinchPro_option = False
+
+        if kwargs.__len__() != 0:
+            if 'LightSail' in kwargs:
+                if kwargs['LightSail']:
+                    self.LightJib_option = True
+                    self.LightGnk_option = True
+
+            if 'HeavySail' in kwargs:
+                if kwargs['HeavySail']:
+                    self.Staysail_option = True
+                    self.HeavyGnk_option = True
+
+            if 'Code0' in kwargs:
+                if kwargs['Code0']:
+                    self.Code0_option = True
+
+            if 'Foil' in kwargs:
+                if kwargs['Foil']:
+                    self.Foil_option = True
+
+            if 'Polish' in kwargs:
+                if kwargs['Polish']:
+                    self.Polish_option = True
+
+            if 'WinchPro' in kwargs:
+                if kwargs['WinchPro']:
+                    self.WinchPro_option = True
+
+            if 'FullPack' in kwargs:
+                if kwargs['FullPack']:
+                    self.Staysail_option = True
+                    self.LightJib_option = True
+                    self.Code0_option = True
+                    self.HeavyGnk_option = True
+                    self.LightGnk_option = True
+                    self.Foil_option = True
+                    self.Hull_option = True
+                    self.WinchPro_option = True
+        if self.Foil_option:
+            self.foil = Foil()
+
+
+
+
 
     def read(self, json_polar_file):
         file = open(json_polar_file, 'r')
@@ -30,13 +83,14 @@ class Boat:
             self.sail_name.append(polar_data['sail'][i]['name'])
             self.sail_speed[:, :, i] = polar_data['sail'][i]['speed']
         # caracteristiques des  foils
-        self.foil.speedRatio = polar_data['foil']['speedRatio']
-        self.foil.twaMin = polar_data['foil']['twaMin']
-        self.foil.twaMax = polar_data['foil']['twaMax']
-        self.foil.twaMerge = polar_data['foil']['twaMerge']
-        self.foil.twsMin = polar_data['foil']['twsMin']
-        self.foil.twsMax = polar_data['foil']['twsMax']
-        self.foil.twsMerge = polar_data['foil']['twsMerge']
+        if self.Foil_option:
+            self.foil.speedRatio = polar_data['foil']['speedRatio']
+            self.foil.twaMin = polar_data['foil']['twaMin']
+            self.foil.twaMax = polar_data['foil']['twaMax']
+            self.foil.twaMerge = polar_data['foil']['twaMerge']
+            self.foil.twsMin = polar_data['foil']['twsMin']
+            self.foil.twsMax = polar_data['foil']['twsMax']
+            self.foil.twsMerge = polar_data['foil']['twsMerge']
 
         # polish
         self.hull = polar_data['hull']['speedRatio']
