@@ -9,13 +9,14 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from boat import *
 from utils import *
 
-myboat = Boat(Foil=True)
-myboat.read('boats\mono\class_40.json')
+myboat = Boat('boats\mono\class_40.json', LightSail=True)
 
-print("foilfactor : ", myboat.foil.foiling_factor(14, 100))
-print("sailname : ", myboat.sail_name)
-print("sailspeed : ", myboat.sail_speed[:,:,0])
-polarXarray = xr.Dataset({
+#myboat.print_options()
+
+
+#print("sailname : ", myboat.sail_name)
+#print("sailspeed : ", myboat.sail_speed[:,:,0])
+"""polarXarray = xr.Dataset({
         "spi": (["twa", "tws"], myboat.sail_speed[:,:,1]),
         "jib": (["twa", "tws"], myboat.sail_speed[:,:,0]),
     },
@@ -23,13 +24,13 @@ polarXarray = xr.Dataset({
         "twa": (myboat.twa_array),
         "tws": (myboat.tws_array),
     },
-)
+)"""
 
-speed =myboat.get_speed_sail(10,25,myboat.sail_speed[:,:,0])
-print("speed", speed)
+#speed =myboat.get_speed_sail(10,25,myboat.sail_speed[:,:,0])
+#print("speed", speed)
 
 
-polarXarray = xr.DataArray(myboat.sail_speed[:,:,0], dims=("twa", "tws"), name="toto", coords={"twa": myboat.twa_array, "tws": myboat.tws_array})
+#polarXarray = xr.DataArray(myboat.sail_speed[:,:,0], dims=("twa", "tws"), name="toto", coords={"twa": myboat.twa_array, "tws": myboat.tws_array})
 #print(polarXarray)
 
 def get_zezo_grib():
