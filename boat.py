@@ -3,16 +3,19 @@ from foil import Foil
 import numpy as np
 from utils import *
 import xarray as xr
+import matplotlib.pyplot as plt
+
+from mpl_toolkits.mplot3d import Axes3D
 
 
 class Boat:
     sail_name = []
-    # sail_speed = []
-    current_location = object
-    destination_location = object
+
 
     def __init__(self, json_boat_file, **kwargs):
         # Choix des options
+        self.current_location = np.zeros(2) #0 :Longitude, 1: Latitude
+        self.destination_location = np.zeros(2) #0 :Longitude, 1: Latitude
         self.twa_array = []
         self.tws_array = []
         self.hull = 1
@@ -78,7 +81,7 @@ class Boat:
         self.boat_name = (polar_data['label'])
         nb_possible_sail = len(polar_data['sail'])
         nb_selected_sail = self.get_nb_selected_sail()
-        #print('nb de voile sélectionné:', nb_selected_sail)
+        # print('nb de voile sélectionné:', nb_selected_sail)
         self.sail_speed = np.zeros((len(self.twa_array), len(self.tws_array), nb_selected_sail))
         index = 0
         if self.Jib_option:
@@ -109,8 +112,8 @@ class Boat:
             self.sail_name.append(polar_data['sail'][6]['name'])
             self.sail_speed[:, :, index] = polar_data['sail'][6]['speed']
             index = index + 1
-        #print(self.sail_name)
-        #print(self.sail_speed)
+        # print(self.sail_name)
+        # print(self.sail_speed)
 
         # caracteristiques des  foils
         if self.Foil_option:
@@ -157,3 +160,35 @@ class Boat:
         if self.LightGnk_option:
             nb = nb + 1
         return nb
+
+    def plotpolar(self, sail_index):
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        ax.set_title(self.sail_name[sail_index])
+        twa_plot = np.arange(0, 180, 1)
+        tws_plot = np.arange(0, 40, 1)
+        print("twaplot:", twa_plot)
+        boatspeed = np.zeros((40, 180))
+        print("toto1", boatspeed.shape)
+        print("toto2", len(boatspeed[1][:]))
+        print("toto3", len(boatspeed[:][0]))
+        print("toto4", len(boatspeed[:][1]))
+        # print("zero", boatspeed)
+
+        for j in range(0, 40):
+            for i in range(0, 180):
+                boatspeed[j][i] = self.get_speed_sail(j, i, self.sail_speed[:, :, sail_index])
+
+
+        # boatspeed[i] = self.get_speed_sail(10,i,self.sail_speed[:,:,0])
+        twa_plot, tws_plot = np.meshgrid(twa_plot, tws_plot)
+        ax.plot_surface(twa_plot, tws_plot, boatspeed, cmap=plt.cm.coolwarm)
+        plt.show()
+
+    def get_sail_interpolated(self, sail_index, speed):
+        sail_speed_interpolated = np.zeros(180)
+        for i in range(0, 180):
+            #sail_speed_interpolated = np.zeros(180)
+            sail_speed_interpolated[i] =self.get_speed_sail(speed, i, self.sail_speed[:, :, sail_index])
+            #print("sail_speed_interpolated[i]", sail_speed_interpolated[i])
+        return sail_speed_interpolated

@@ -18,5 +18,14 @@ def interp2d_linear(x, y, array_x, array_y, data):
     delta_fx = data[x2][y1] - data[x1][y1]
     delta_fy = data[x1][y2] - data[x1][y1]
     delta_fxy = data[x1][y1] + data[x2][y2] - data[x2][y1] - data[x1][y2]
-    result = delta_fx*(dx/delta_x) + delta_fy*(dy/delta_y) + delta_fxy*(dx*dy/(delta_x*delta_y)) + data[x1][y1]
+    result = delta_fx * (dx / delta_x) + delta_fy * (dy / delta_y) + delta_fxy * (dx * dy / (delta_x * delta_y)) + \
+             data[x1][y1]
+    return result
+
+
+def degree_minute_second_to_decimal(degree, minute, second):
+    if degree >= 0:
+        result = degree + minute / 60 + second / 3600
+    else:
+        result = degree - minute / 60 - second / 3600
     return result
