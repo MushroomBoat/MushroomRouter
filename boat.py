@@ -4,18 +4,16 @@ import numpy as np
 from utils import *
 import xarray as xr
 import matplotlib.pyplot as plt
-
-from mpl_toolkits.mplot3d import Axes3D
+import time
 
 
 class Boat:
     sail_name = []
 
-
     def __init__(self, json_boat_file, **kwargs):
         # Choix des options
-        self.current_location = np.zeros(2) #0 :Longitude, 1: Latitude
-        self.destination_location = np.zeros(2) #0 :Longitude, 1: Latitude
+        self.current_location = np.zeros(2)  # 0 :Longitude, 1: Latitude
+        self.destination_location = np.zeros(2)  # 0 :Longitude, 1: Latitude
         self.twa_array = []
         self.tws_array = []
         self.hull = 1
@@ -31,6 +29,8 @@ class Boat:
         self.Foil_option = False
         self.Polish_option = False
         self.WinchPro_option = False
+        self.utc = get_utctime()
+        print("heure actuelle UTC", self.utc)
 
         if kwargs.__len__() != 0:
             if 'LightSail' in kwargs:
@@ -112,6 +112,7 @@ class Boat:
             self.sail_name.append(polar_data['sail'][6]['name'])
             self.sail_speed[:, :, index] = polar_data['sail'][6]['speed']
             index = index + 1
+        self.get_best_polar_sail()
         # print(self.sail_name)
         # print(self.sail_speed)
 
@@ -179,16 +180,43 @@ class Boat:
             for i in range(0, 180):
                 boatspeed[j][i] = self.get_speed_sail(j, i, self.sail_speed[:, :, sail_index])
 
-
         # boatspeed[i] = self.get_speed_sail(10,i,self.sail_speed[:,:,0])
         twa_plot, tws_plot = np.meshgrid(twa_plot, tws_plot)
         ax.plot_surface(twa_plot, tws_plot, boatspeed, cmap=plt.cm.coolwarm)
         plt.show()
 
-    def get_sail_interpolated(self, sail_index, speed):
-        sail_speed_interpolated = np.zeros(180)
-        for i in range(0, 180):
-            #sail_speed_interpolated = np.zeros(180)
-            sail_speed_interpolated[i] =self.get_speed_sail(speed, i, self.sail_speed[:, :, sail_index])
-            #print("sail_speed_interpolated[i]", sail_speed_interpolated[i])
+    def get_sail_interpolated(self, sail, speed):
+        sail_speed_interpolated = np.zeros(181)
+        #print('speed_interpol', speed)
+        for i in range(0, 181):
+            sail_speed_interpolated[i] = self.get_speed_sail(speed, i, sail)
+
         return sail_speed_interpolated
+
+    def get_best_polar_sail(self):
+        nb = np.shape(self.sail_speed)
+        self.best_polar_sail = np.zeros((31, 18))
+        self.best_polar_sail[:, :] = self.sail_speed[:, :, 0]
+        self.best_polar_sail = np.maximum(self.best_polar_sail, self.sail_speed[:, :, 1])
+        if nb[2] > 2:
+            for i in range(2, nb[2]):
+                self.best_polar_sail = np.maximum(self.best_polar_sail, self.sail_speed[:, :, i])
+        return self.best_polar_sail
+
+    def navigate(self, dswind):
+        self.dswind = dswind
+        utc = get_utctime()
+        windspeed, windangle = get_wind_speed(self.current_location[1], self.current_location[0], utc, self.dswind)
+        print('windspeed', utc, windspeed, windangle)
+
+        self.get_best_polar_sail()
+        speed = np.zeros(360)
+        print('windspeed', windspeed)
+        for i in range(0, 181):
+            speed[i] = self.get_speed_sail(windspeed, i, self.best_polar_sail)*self.foil.foiling_factor(windspeed, i)*self.hull
+            speed[(360-i) % 360] = speed[i]
+
+        #print('speed', speed)
+
+
+

@@ -1,6 +1,5 @@
 from utils import *
 import math
-import numpy as np
 
 
 class Foil:
